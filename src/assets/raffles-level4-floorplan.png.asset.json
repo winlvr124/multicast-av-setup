@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "e83d0dc3-268d-4fb3-bd7a-6d69d8a6accb",
-  "project_id": "c759e76b-3762-4d13-bc76-e9beb25f8c90",
-  "url": "/__l5e/assets-v1/e83d0dc3-268d-4fb3-bd7a-6d69d8a6accb/raffles-level4-floorplan.png",
-  "r2_key": "a/v1/c759e76b-3762-4d13-bc76-e9beb25f8c90/e83d0dc3-268d-4fb3-bd7a-6d69d8a6accb/raffles-level4-floorplan.png",
-  "original_filename": "raffles-level4-floorplan.png",
-  "size": 1715464,
   "content_type": "image/png",
-  "created_at": "2026-11-13T02:57:53Z"
+  "created_at": "2026-11-13T02:57:53Z",
+  "original_filename": "raffles-level4-floorplan.png",
+  "project_id": "e6166bf5-e9a4-4b55-8338-b3118df88ceb",
+  "r2_key": "a/v1/e6166bf5-e9a4-4b55-8338-b3118df88ceb/e83d0dc3-268d-4fb3-bd7a-6d69d8a6accb/raffles-level4-floorplan.png",
+  "size": 1715464,
+  "url": "/__l5e/assets-v1/e83d0dc3-268d-4fb3-bd7a-6d69d8a6accb/raffles-level4-floorplan.png",
+  "version": 1
 }
