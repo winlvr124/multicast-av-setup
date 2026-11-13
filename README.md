@@ -1,4 +1,4 @@
-# Multicast Signal Studio AVS
+# AV-over-IP Multicast Signage Simulation created via Lovable AI
 
 This project is an interactive simulation developed using Lovable AI to demonstrate AV-over-IP multicast streaming at Raffles City Convention Centre. 
 It features two encoders, three decoders, and a managed network switch to distribute digital signage content to multiple rooms. 
@@ -21,6 +21,7 @@ This project was built with [Lovable](https://lovable.dev) and help from [ChatGP
 ## Important Notes
 ------------------
 
+- Location is used as an example only.
 - This project is an AI-generated simulation.
 - It is not connected to actual AV hardware.
 - Multicast addresses and streaming activities are simulated.
