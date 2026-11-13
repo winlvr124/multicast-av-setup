@@ -14,6 +14,8 @@ This project was built with [Lovable](https://lovable.dev) and help from [ChatGP
 - Used for prompts to give to Lovable AI
 - Created the floorplan photo according to worksheet guidelines
 
+## Website to test
+
 **Live app**: https://multicast-av-setup.lovable.app
 
 ## Build with Lovable
