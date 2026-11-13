@@ -9,10 +9,8 @@ import {
   DECODERS,
   ENCODERS,
   SIM_NETWORK,
-  decoderById,
   decoderDisplayState,
   encoderById,
-  type EncoderId,
 } from "@/lib/av-sim";
 
 export const Route = createFileRoute("/floor-plan")({
