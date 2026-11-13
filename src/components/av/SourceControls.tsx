@@ -7,7 +7,7 @@ export const sourceText: Record<EncoderId, string> = { enc1: "text-source-a", en
 export const sourceFill: Record<EncoderId, string> = { enc1: "fill-source-a", enc2: "fill-source-b" };
 export const sourceBg: Record<EncoderId, string> = { enc1: "bg-source-a", enc2: "bg-source-b" };
 
-export function SourceBadge({ encoder, className }: { encoder: EncoderId; className?: string }) {
+export function SourceBadge({ encoder, className }: { encoder: EncoderId; className?: string | undefined }) {
   const e = ENCODERS.find((x) => x.id === encoder)!;
   return (
     <span

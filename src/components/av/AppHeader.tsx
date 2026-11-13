@@ -9,7 +9,9 @@ const tabClass =
   "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&_svg]:size-4";
 
 export function AppHeader() {
-  const { streaming } = useSimulation();
+  const { streaming: map } = useSimulation();
+  const live = Object.values(map).filter(Boolean).length;
+  const streaming = live > 0;
   const [clock, setClock] = useState("");
 
   useEffect(() => {
@@ -50,7 +52,7 @@ export function AppHeader() {
           )}
         >
           <StatusDot tone={streaming ? "live" : "idle"} className="size-2" />
-          {streaming ? "Multicast live" : "Stream stopped"}
+          {streaming ? `Multicast live · ${live} ${live === 1 ? "stream" : "streams"}` : "Streams stopped"}
         </span>
         <span className="rounded-md border border-warning/40 bg-warning/10 px-2 py-1 font-mono text-[0.6rem] font-semibold uppercase tracking-wider text-warning">
           Simulation · not connected to hardware
