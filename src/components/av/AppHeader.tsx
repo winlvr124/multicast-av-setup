@@ -30,7 +30,7 @@ export function AppHeader() {
         <div className="leading-tight">
           <h1 className="text-base font-bold tracking-tight">AV-over-IP Multicast Signage</h1>
           <p className="text-xs text-muted-foreground">
-            ITE AV IT &amp; Streaming · Option B – Streaming Digital Signage (1-to-Many)
+            AV-over-IP Multicast · Streaming Digital Signage (1-to-Many)
           </p>
         </div>
       </div>
