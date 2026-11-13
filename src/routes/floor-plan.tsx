@@ -140,9 +140,8 @@ function FloorPlanPage() {
 
         <section className="panel space-y-1.5 p-3 text-xs">
           <span className="panel-label">Legend</span>
-          <LegendLine className="bg-primary" label="Ethernet link up (idle)" />
-          <LegendLine className="bg-success" label="Multicast stream active" />
-          <LegendLine className="bg-hdmi" label="HDMI (laptop → encoder)" />
+          <LegendLine className="bg-success" label="Multicast packets (animated)" />
+          <LegendLine className="bg-warning" label="Decoder rejoining" />
           <LegendLine className="bg-destructive" label="Link down (troubleshooting)" />
           <p className="pt-1 font-mono text-[0.58rem] uppercase tracking-wider text-warning/80">
             ⚠ Example settings · not a hardware controller
