@@ -38,7 +38,7 @@ function FloorPlanPage() {
   const { streaming, start, stop, statuses, subscriptions, disconnect, reconnect } = useSimulation();
 
   return (
-    <div className="grid h-full gap-3 p-3 lg:grid-cols-[1fr_300px]">
+    <div className="palette-floor-plan grid h-full gap-3 p-3 lg:grid-cols-[1fr_300px]">
       <section className="panel flex min-h-0 flex-col p-3">
         <div className="mb-2 flex items-center justify-between">
           <span className="panel-label">Raffles City Convention Centre · Level 4 · Proposed layout</span>
@@ -140,9 +140,12 @@ function FloorPlanPage() {
 
         <section className="panel space-y-1.5 p-3 text-xs">
           <span className="panel-label">Legend</span>
-          <LegendLine className="bg-success" label="Multicast packets (animated)" />
+          <LegendLine className="bg-source-a" label="ENC-01 · Source A multicast" />
+          <LegendLine className="bg-source-b" label="ENC-02 · Source B multicast" />
+          <LegendLine className="bg-hdmi" label="HDMI · laptop to encoder" />
+          <LegendLine className="bg-muted-foreground" label="Link idle (encoder stopped)" />
           <LegendLine className="bg-warning" label="Decoder rejoining" />
-          <LegendLine className="bg-destructive" label="Link down (troubleshooting)" />
+          <LegendLine className="bg-destructive" label="Disconnected (troubleshooting)" />
           <p className="pt-1 font-mono text-[0.58rem] uppercase tracking-wider text-warning/80">
             ⚠ Example settings · not a hardware controller
           </p>
