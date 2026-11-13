@@ -35,7 +35,7 @@ function Marker({ x, y, label, live }: { x: number; y: number; label: string; li
         strokeWidth={3}
         style={{ transformOrigin: `${x}px ${y}px`, transformBox: "view-box" }}
       />
-      <title>{label} (proposed location)</title>
+      <title>{`${label} (proposed location)`}</title>
     </g>
   );
 }
