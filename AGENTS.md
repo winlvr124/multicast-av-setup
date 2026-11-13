@@ -28,3 +28,9 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+
+- Simulation state (stream on/off, content, decoder statuses, event log) lives in `SimulationProvider` mounted in `src/routes/__root.tsx`, so the Dashboard and Floor Plan tabs always show the same state.
+- Display/multicast rules are pure functions in `src/lib/av-sim.ts` with tests in `src/test/av-sim.test.ts`; UI components read them instead of re-deriving state.
+- Floor-plan overlays use the uploaded image's pixel coordinates via an SVG viewBox of the same size, so markers stay aligned at any screen size.
