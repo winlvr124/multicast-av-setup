@@ -150,6 +150,11 @@
   color: var(--muted-foreground);
 }
 
+/* Floor Plan tab only: Source B reads as blue to match the floor-plan image's ENC-02 link. */
+@utility palette-floor-plan {
+  --source-b: oklch(0.68 0.17 252);
+}
+
 @utility glow-primary {
   box-shadow: var(--glow-primary);
 }
