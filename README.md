@@ -52,7 +52,7 @@ Prefer working locally? Check if you have the system requirements and follow the
 
 ## Guide
 
-## STEP 1: INSTALL NVM FOR WINDOWS
+## STEP 1: Install NVM for Windows
 
 1. Visit:
    https://github.com/coreybutler/nvm-windows/releases
@@ -65,8 +65,8 @@ Prefer working locally? Check if you have the system requirements and follow the
 
 5. Verify installation by running:
    nvm version
-_____________________________________________________________________________________
-## STEP 2: INSTALL NODE.JS
+
+## STEP 2: Install node.js
 
 Open PowerShell or Command Prompt and run:
 nvm install 22
@@ -79,8 +79,8 @@ npm -v
 NOTE:
 If nvm use reports a permission error, try opening
 PowerShell as Administrator.
-_____________________________________________________________________________________
-## STEP 3: EXTRACT THE PROJECT
+
+## STEP 3: Extract the project
 
 1. Download the project ZIP file.
 
@@ -89,8 +89,8 @@ ________________________________________________________________________________
 3. Open the extracted project folder.
 
 4. Ensure package.json is inside the folder.
-_____________________________________________________________________________________
-## STEP 4: OPEN POWERSHELL
+
+## STEP 4: Open Powershell
 
 1. Open the extracted project folder in File Explorer.
 
@@ -99,8 +99,8 @@ ________________________________________________________________________________
 3. Type powershell and press Enter.
 
 4. PowerShell will open in the project directory.
-_____________________________________________________________________________________
-## STEP 5: INSTALL DEPENDENCIES
+
+## STEP 5: Install Dependencies
 
 Run: npm install
 
@@ -109,8 +109,8 @@ Wait for installation to complete.
 NOTE:
 Deprecation warnings may appear during installation.
 These do not necessarily prevent the application from running.
-_____________________________________________________________________________________
-## STEP 6: START THE SIMULATION
+
+## STEP 6: Start the simulation
 
 Run: npm run dev
 
@@ -123,8 +123,8 @@ The terminal will display a local URL, for example:
 Open the URL shown in PowerShell using Chrome or Edge.
 
 The AV-over-IP simulation should now be running.
-_____________________________________________________________________________________
-## STOPPING THE SIMULATION
+
+## Stopping the simulation
 1. Return to the PowerShell window.
 
 2. Press Ctrl + C.
@@ -135,8 +135,9 @@ To restart the simulation, run: npm run dev
 
 There is no need to reinstall dependencies unless they
 have changed or are missing.
-_____________________________________________________________________________________
-## TROUBLESHOOTING
+
+## Troubleshooting
+
 PROBLEM: NVM IS NOT RECOGNISED
 
 - Ensure NVM for Windows is installed correctly.
