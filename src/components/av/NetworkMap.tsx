@@ -1,31 +1,59 @@
-import { DECODERS, SIM_NETWORK, type DecoderId, type DecoderStatus } from "@/lib/av-sim";
+import {
+  DECODERS,
+  ENCODERS,
+  SIM_NETWORK,
+  decoderDisplayState,
+  subscribersOf,
+  type DecoderId,
+  type DecoderStatus,
+  type EncoderId,
+} from "@/lib/av-sim";
 import { cn } from "@/lib/utils";
 import { useSimulation } from "./SimulationContext";
+import { sourceFill } from "./SourceControls";
 
 const W = 640;
 const H = 520;
 const SW = { x: 245, y: 228, w: 150, h: 64 };
-const ENC = { x: 30, y: 230, w: 90, h: 60 };
+const ENC_X = 30;
+const ENC_W = 90;
+const ENC_H = 60;
+const ENC_Y: Record<EncoderId, number> = { enc1: 140, enc2: 360 };
+const SW_IN_Y: Record<EncoderId, number> = { enc1: 250, enc2: 270 };
 const DEC_Y: Record<DecoderId, number> = { dec1: 80, dec2: 260, dec3: 440 };
 const DEC_X = 516;
 
-const UPLINK = `M${ENC.x + ENC.w} 260 H${SW.x}`;
+const uplink = (id: EncoderId) => {
+  const y = ENC_Y[id];
+  const yi = SW_IN_Y[id];
+  return `M${ENC_X + ENC_W} ${y} C ${ENC_X + ENC_W + 70} ${y}, ${SW.x - 70} ${yi}, ${SW.x} ${yi}`;
+};
 const downlink = (y: number) =>
   y === 260
     ? `M${SW.x + SW.w} 260 H${DEC_X}`
     : `M${SW.x + SW.w} 260 C 470 260, 450 ${y}, ${DEC_X} ${y}`;
 
-function Packets({ pathId, count = 4, dur = 1.6 }: { pathId: string; count?: number; dur?: number }) {
+function Packets({
+  pathId,
+  fill,
+  count = 4,
+  dur = 1.6,
+}: {
+  pathId: string;
+  fill: string;
+  count?: number;
+  dur?: number;
+}) {
   return (
     <g>
       {Array.from({ length: count }).map((_, i) => (
-        <g key={i}>
-          <circle r={7} className="fill-success/25">
+        <g key={i} className={fill}>
+          <circle r={7} opacity={0.25}>
             <animateMotion dur={`${dur}s`} repeatCount="indefinite" begin={`${-(i * dur) / count}s`}>
               <mpath href={`#${pathId}`} />
             </animateMotion>
           </circle>
-          <circle r={3.2} className="fill-success">
+          <circle r={3.2}>
             <animateMotion dur={`${dur}s`} repeatCount="indefinite" begin={`${-(i * dur) / count}s`}>
               <mpath href={`#${pathId}`} />
             </animateMotion>
@@ -36,19 +64,28 @@ function Packets({ pathId, count = 4, dur = 1.6 }: { pathId: string; count?: num
   );
 }
 
-function linkClass(streaming: boolean, status: DecoderStatus) {
+function linkClass(live: boolean, status: DecoderStatus) {
   if (status === "offline") return "stroke-destructive/70";
   if (status === "connecting") return "stroke-warning";
-  return streaming ? "stroke-success/70" : "stroke-primary/70";
+  return live ? "stroke-success/70" : "stroke-primary/70";
 }
 
 export function NetworkMap() {
-  const { streaming, statuses } = useSimulation();
+  const { streaming, anyStreaming, statuses, subscriptions } = useSimulation();
+  const liveDec = (id: DecoderId) => decoderDisplayState(streaming, statuses[id], subscriptions[id]) === "content";
+
+  const groupCounts = ENCODERS.map((e) => ({ e, n: subscribersOf(subscriptions, e.id).length }));
+  const oneSource = groupCounts.some((g) => g.n === DECODERS.length);
+  const caption = oneSource
+    ? `ONE SOURCE → MULTICAST → THREE IDENTICAL OUTPUTS (SIMULATED)`
+    : `${groupCounts.map(({ e, n }) => `${e.code} → ${n} ${n === 1 ? "ROOM" : "ROOMS"}`).join(" · ")} · SIMULATED`;
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="size-full" role="img" aria-label="Simulated multicast network diagram">
       <defs>
-        <path id="uplink" d={UPLINK} />
+        {ENCODERS.map((e) => (
+          <path key={e.id} id={`up-${e.id}`} d={uplink(e.id)} />
+        ))}
         {DECODERS.map((d) => (
           <path key={d.id} id={`down-${d.id}`} d={downlink(DEC_Y[d.id])} />
         ))}
@@ -58,27 +95,32 @@ export function NetworkMap() {
         </linearGradient>
       </defs>
 
-      {/* Uplink: encoder → switch (single multicast stream) */}
-      <use href="#uplink" className={cn("fill-none stroke-[3]", streaming ? "stroke-success/70" : "stroke-primary/60")} />
-      {streaming && (
-        <use href="#uplink" className="fill-none stroke-success stroke-[1.5] animate-dash-flow" strokeDasharray="8 4" />
-      )}
-      <text x={(ENC.x + ENC.w + SW.x) / 2} y={246} textAnchor="middle" className="fill-muted-foreground font-mono text-[9px]">
-        {SIM_NETWORK.multicastGroup}:{SIM_NETWORK.udpPort}
-      </text>
-      <text x={(ENC.x + ENC.w + SW.x) / 2} y={282} textAnchor="middle" className="fill-muted-foreground/70 font-mono text-[8px]">
-        1 stream · port 1
-      </text>
+      {/* Uplinks: each encoder → switch (one multicast group per encoder) */}
+      {ENCODERS.map((e) => {
+        const on = streaming[e.id];
+        const midY = (ENC_Y[e.id] + SW_IN_Y[e.id]) / 2;
+        return (
+          <g key={e.id}>
+            <use href={`#up-${e.id}`} className={cn("fill-none stroke-[3]", on ? "stroke-success/70" : "stroke-primary/60")} />
+            {on && (
+              <use href={`#up-${e.id}`} className="fill-none stroke-success stroke-[1.5] animate-dash-flow" strokeDasharray="8 4" />
+            )}
+            <text x={190} y={midY + (e.id === "enc1" ? -6 : 14)} textAnchor="middle" className="fill-muted-foreground/70 font-mono text-[8px]">
+              port {e.switchPort}
+            </text>
+          </g>
+        );
+      })}
 
-      {/* Downlinks: switch → decoders (replicated by IGMP snooping) */}
+      {/* Downlinks: switch → decoders (replicated per group by IGMP snooping) */}
       {DECODERS.map((d) => {
         const status = statuses[d.id];
-        const active = streaming && status === "online";
+        const active = liveDec(d.id);
         return (
           <g key={d.id}>
             <use
               href={`#down-${d.id}`}
-              className={cn("fill-none stroke-[3] transition-colors", linkClass(streaming, status))}
+              className={cn("fill-none stroke-[3] transition-colors", linkClass(active, status))}
               strokeDasharray={status === "offline" ? "6 6" : undefined}
             />
             {active && (
@@ -94,34 +136,56 @@ export function NetworkMap() {
         );
       })}
 
-      {streaming && <Packets pathId="uplink" count={3} dur={1.2} />}
+      {ENCODERS.map((e) =>
+        streaming[e.id] ? <Packets key={e.id} pathId={`up-${e.id}`} fill={sourceFill[e.id]} count={3} dur={1.3} /> : null,
+      )}
       {DECODERS.map((d) =>
-        streaming && statuses[d.id] === "online" ? <Packets key={d.id} pathId={`down-${d.id}`} count={4} dur={1.8} /> : null,
+        liveDec(d.id) ? (
+          <Packets key={d.id} pathId={`down-${d.id}`} fill={sourceFill[subscriptions[d.id]]} count={4} dur={1.8} />
+        ) : null,
       )}
 
-      {/* Encoder node */}
-      <g>
-        <rect
-          x={ENC.x}
-          y={ENC.y}
-          width={ENC.w}
-          height={ENC.h}
-          rx={10}
-          className={cn("fill-card stroke-2", streaming ? "stroke-success" : "stroke-primary")}
-        />
-        <rect x={ENC.x + 14} y={ENC.y + 18} width={ENC.w - 28} height={14} rx={3} className="fill-secondary" />
-        <circle cx={ENC.x + ENC.w - 22} cy={ENC.y + 25} r={2.5} className={cn(streaming ? "fill-success animate-led-blink" : "fill-primary")} />
-        <text x={ENC.x + ENC.w / 2} y={ENC.y + 48} textAnchor="middle" className="fill-foreground font-mono text-[10px] font-semibold">
-          ENC-01
-        </text>
-        <text x={ENC.x + ENC.w / 2} y={ENC.y + ENC.h + 16} textAnchor="middle" className="fill-muted-foreground font-mono text-[8px]">
-          {SIM_NETWORK.encoderIp}
-        </text>
-      </g>
+      {/* Encoder nodes */}
+      {ENCODERS.map((e) => {
+        const on = streaming[e.id];
+        const y = ENC_Y[e.id] - ENC_H / 2;
+        return (
+          <g key={e.id}>
+            <rect
+              x={ENC_X}
+              y={y}
+              width={ENC_W}
+              height={ENC_H}
+              rx={10}
+              className={cn("fill-card stroke-2", on ? "stroke-success" : "stroke-primary")}
+            />
+            <rect x={ENC_X + 14} y={y + 18} width={ENC_W - 28} height={14} rx={3} className="fill-secondary" />
+            <circle cx={ENC_X + ENC_W - 22} cy={y + 25} r={2.5} className={cn(on ? "fill-success animate-led-blink" : "fill-primary")} />
+            <rect x={ENC_X + 6} y={y - 8} width={18} height={16} rx={4} className={sourceFill[e.id]} />
+            <text x={ENC_X + 15} y={y + 4} textAnchor="middle" className="fill-primary-foreground font-mono text-[10px] font-bold">
+              {e.letter}
+            </text>
+            <text x={ENC_X + ENC_W / 2} y={y + 48} textAnchor="middle" className="fill-foreground font-mono text-[10px] font-semibold">
+              {e.code}
+            </text>
+            <text x={ENC_X + ENC_W / 2} y={y + ENC_H + 13} textAnchor="middle" className="fill-muted-foreground font-mono text-[8px]">
+              {e.ip}
+            </text>
+            <text
+              x={ENC_X + ENC_W / 2}
+              y={y + ENC_H + 25}
+              textAnchor="middle"
+              className={cn("font-mono text-[8.5px]", on ? "fill-success" : "fill-primary")}
+            >
+              {e.multicastGroup}:{SIM_NETWORK.udpPort}
+            </text>
+          </g>
+        );
+      })}
 
       {/* Switch node */}
       <g>
-        {streaming && (
+        {anyStreaming && (
           <rect
             x={SW.x - 6}
             y={SW.y - 6}
@@ -139,8 +203,9 @@ export function NetworkMap() {
         {Array.from({ length: 8 }).map((_, i) => {
           const port = i + 1;
           const dec = DECODERS.find((d) => d.switchPort === port);
-          const up = port === 1 || (dec ? statuses[dec.id] !== "offline" : false);
-          const live = streaming && (port === 1 || (dec && statuses[dec.id] === "online"));
+          const enc = ENCODERS.find((e) => e.switchPort === port);
+          const up = !!enc || (dec ? statuses[dec.id] !== "offline" : false);
+          const live = enc ? streaming[enc.id] : dec ? liveDec(dec.id) : false;
           return (
             <g key={port}>
               <rect x={SW.x + 15 + i * 15.5} y={SW.y + 32} width={12} height={10} rx={1.5} className="fill-panel-inset stroke-border" />
@@ -149,9 +214,7 @@ export function NetworkMap() {
                 y={SW.y + 34}
                 width={8}
                 height={2.5}
-                className={cn(
-                  live ? "fill-success animate-led-blink" : up ? "fill-primary" : "fill-muted-foreground/30",
-                )}
+                className={cn(live ? "fill-success animate-led-blink" : up ? "fill-primary" : "fill-muted-foreground/30")}
                 style={live ? { animationDelay: `${i * 0.13}s` } : undefined}
               />
               <text x={SW.x + 21 + i * 15.5} y={SW.y + 54} textAnchor="middle" className="fill-muted-foreground font-mono text-[7px]">
@@ -172,7 +235,8 @@ export function NetworkMap() {
       {DECODERS.map((d) => {
         const status = statuses[d.id];
         const y = DEC_Y[d.id];
-        const live = streaming && status === "online";
+        const live = liveDec(d.id);
+        const enc = ENCODERS.find((e) => e.id === subscriptions[d.id])!;
         return (
           <g key={d.id}>
             <rect
@@ -197,18 +261,33 @@ export function NetworkMap() {
             <text x={DEC_X + 24} y={y - 7} className="fill-foreground font-mono text-[10px] font-semibold">
               {d.code}
             </text>
+            <rect x={DEC_X + 88} y={y - 19} width={20} height={14} rx={3} className={cn(sourceFill[enc.id], !live && "opacity-50")} />
+            <text x={DEC_X + 98} y={y - 9} textAnchor="middle" className="fill-primary-foreground font-mono text-[9px] font-bold">
+              {enc.letter}
+            </text>
             <text x={DEC_X + 12} y={y + 8} className="fill-muted-foreground text-[9px]">
               {d.room}
             </text>
             <text x={DEC_X + 12} y={y + 19} className="fill-muted-foreground/70 font-mono text-[7.5px]">
-              port {d.switchPort} · {d.ip}
+              port {d.switchPort} · {enc.multicastGroup}
             </text>
           </g>
         );
       })}
 
+      {/* Legend */}
+      <g transform={`translate(${W / 2 - 110} ${H - 30})`} className="font-mono text-[8.5px]">
+        {ENCODERS.map((e, i) => (
+          <g key={e.id} transform={`translate(${i * 120} 0)`}>
+            <circle cx={4} cy={-3} r={3.5} className={sourceFill[e.id]} />
+            <text x={12} y={0} className="fill-muted-foreground">
+              {e.source} · {e.code}
+            </text>
+          </g>
+        ))}
+      </g>
       <text x={W / 2} y={H - 8} textAnchor="middle" className="fill-muted-foreground/70 font-mono text-[9px] tracking-widest">
-        ONE SOURCE → MULTICAST → THREE IDENTICAL OUTPUTS (SIMULATED)
+        {caption}
       </text>
     </svg>
   );

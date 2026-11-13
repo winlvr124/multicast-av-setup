@@ -1,19 +1,22 @@
 import { Plug, Unplug } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SIM_NETWORK, getDisplayState, type DecoderInfo } from "@/lib/av-sim";
+import { decoderDisplayState, encoderById, type DecoderInfo } from "@/lib/av-sim";
 import { cn } from "@/lib/utils";
 import { SignageScreen } from "./SignageScreen";
 import { useSimulation } from "./SimulationContext";
+import { SourceSelector } from "./SourceControls";
 import { StatusDot, type Tone } from "./StatusDot";
 
 export function DecoderPanel({ decoder }: { decoder: DecoderInfo }) {
-  const { streaming, content, statuses, bitrate, disconnect, reconnect } = useSimulation();
+  const { streaming, contentByEncoder, statuses, stats, subscriptions, disconnect, reconnect } = useSimulation();
   const status = statuses[decoder.id];
-  const state = getDisplayState(streaming, status);
+  const encoderId = subscriptions[decoder.id];
+  const encoder = encoderById(encoderId);
+  const state = decoderDisplayState(streaming, status, encoderId);
   const live = state === "content";
 
   const tone: Tone = status === "offline" ? "offline" : status === "connecting" ? "warn" : live ? "live" : "online";
-  const label = status === "offline" ? "Offline" : status === "connecting" ? "Connecting" : live ? "Receiving" : "Online";
+  const label = status === "offline" ? "Offline" : status === "connecting" ? "Joining" : live ? "Receiving" : "Online";
 
   return (
     <section className={cn("panel flex min-h-0 flex-1 flex-col p-2.5 transition-shadow", live && "glow-success")}>
@@ -36,22 +39,22 @@ export function DecoderPanel({ decoder }: { decoder: DecoderInfo }) {
       </div>
       <div className="grid min-h-0 flex-1 grid-cols-[1.35fr_1fr] gap-2.5">
         <div className="flex flex-col justify-center">
-          <SignageScreen state={state} content={content} compact />
+          <SignageScreen state={state} content={contentByEncoder[encoderId]} source={encoderId} compact />
           <span className="mt-1 text-center font-mono text-[0.55rem] uppercase tracking-wider text-muted-foreground/70">
             Display · HDMI from {decoder.code}
           </span>
         </div>
         <div className="flex min-w-0 flex-col justify-between gap-1.5">
+          <SourceSelector decoder={decoder.id} />
           <dl className="space-y-0.5 font-mono text-[0.62rem]">
             <Row k="Decoder" v={decoder.code} />
             <Row k="IP" v={decoder.ip} />
-            <Row k="Group" v={status === "offline" ? "—" : SIM_NETWORK.multicastGroup} />
+            <Row k="Group" v={status === "offline" ? "—" : encoder.multicastGroup} />
             <Row
               k="RX"
-              v={live ? `${(bitrate - 0.05).toFixed(1)} Mbps` : "0.0 Mbps"}
+              v={live ? `${(stats[encoderId].bitrate - 0.05).toFixed(1)} Mbps` : "0.0 Mbps"}
               className={live ? "text-success" : undefined}
             />
-            <Row k="Drops" v={live ? "0" : "—"} />
           </dl>
           {status === "offline" ? (
             <Button variant="control" size="sm" onClick={() => reconnect(decoder.id)}>

@@ -1,18 +1,22 @@
 import { Loader2, MonitorOff, WifiOff } from "lucide-react";
-import type { DisplayState } from "@/lib/av-sim";
+import { encoderById, type DisplayState, type EncoderId } from "@/lib/av-sim";
 import { cn } from "@/lib/utils";
 import type { SignageItem } from "./signage";
+import { sourceBg } from "./SourceControls";
 
 export function SignageScreen({
   state,
   content,
   className,
   compact = false,
+  source,
 }: {
   state: DisplayState;
   content: SignageItem;
   className?: string;
   compact?: boolean;
+  /** When set, tags the picture with the encoder it came from. */
+  source?: EncoderId | undefined;
 }) {
   return (
     <div
@@ -31,6 +35,16 @@ export function SignageScreen({
           height={912}
           className="absolute inset-0 size-full object-cover animate-screen-in"
         />
+      )}
+      {state === "content" && source && (
+        <span
+          className={cn(
+            "absolute bottom-1 left-1 rounded px-1 py-px font-mono text-[0.5rem] font-bold uppercase tracking-wider text-primary-foreground",
+            sourceBg[source],
+          )}
+        >
+          {encoderById(source).letter} · {encoderById(source).code}
+        </span>
       )}
       {state === "idle" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-muted-foreground/70">
